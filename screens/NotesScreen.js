@@ -1,3 +1,4 @@
+import firebase from "../database/firebaseDB.js";
 import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
@@ -10,6 +11,14 @@ import { Ionicons } from "@expo/vector-icons";
 
 export default function NotesScreen({ navigation, route }) {
   const [notes, setNotes] = useState([]);
+{/*
+  firebase.firestore().collection("testing").add({
+    title: "Testing! Does this work???",
+    body: "This is to check the Integration is working",
+    potato: true,
+    question: "Why is there a potato bool here",
+  });
+*/}
 
   // This is to set up the top right button
   useEffect(() => {
@@ -38,6 +47,7 @@ export default function NotesScreen({ navigation, route }) {
         done: false,
         id: notes.length.toString(),
       };
+      firebase.firestore().collection("todos").add(newNote);
       setNotes([...notes, newNote]);
     }
   }, [route.params?.text]);
