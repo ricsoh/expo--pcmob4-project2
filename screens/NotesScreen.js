@@ -11,14 +11,26 @@ import { Ionicons } from "@expo/vector-icons";
 
 export default function NotesScreen({ navigation, route }) {
   const [notes, setNotes] = useState([]);
-{/*
-  firebase.firestore().collection("testing").add({
-    title: "Testing! Does this work???",
-    body: "This is to check the Integration is working",
-    potato: true,
-    question: "Why is there a potato bool here",
-  });
-*/}
+  const [docName, setDocName] = useState([]);
+
+  // Load up Firebase on start.
+  // The snapshot keeps everything synced -- no need to do it again!
+  useEffect(() => {
+    const unsubcribe = firebase
+      .firestore()
+      .collection("todos")
+      .onSnapshot((snapshot) => {
+        const updatedNotes = snapshot.docs.map((doc) => doc.data());
+        setNotes(updatedNotes);
+        setDocName(snapshot.docs); // this set up a array that store the unique docName
+        alert("docName[0] is '" + docName[15].id + "'");
+      });
+
+    // Unsubcribe when unmounting
+    return () => {
+      unsubcribe();
+    };
+  }, []);
 
   // This is to set up the top right button
   useEffect(() => {
@@ -91,7 +103,8 @@ export default function NotesScreen({ navigation, route }) {
         data={notes}
         renderItem={renderItem}
         style={{ width: "100%" }}
-        keyExtractor={(item) => item.id.toString()}
+//        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id} // This version id is already a string
       />
     </View>
   );
