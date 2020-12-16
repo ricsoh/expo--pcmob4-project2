@@ -10,8 +10,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 
 export default function NotesScreen({ navigation, route }) {
-  const [notes, setNotes] = useState([]);
   const [docName, setDocName] = useState([]);
+  const [notes, setNotes] = useState([]);
 
   // Load up Firebase on start.
   // The snapshot keeps everything synced -- no need to do it again!
@@ -22,10 +22,10 @@ export default function NotesScreen({ navigation, route }) {
       .onSnapshot((snapshot) => {
         const updatedNotes = snapshot.docs.map((doc) => doc.data());
         setNotes(updatedNotes);
+        // replace id to document name, not sure if this is the one
         setDocName(snapshot.docs); // this set up a array that store the unique docName
-        alert("docName[0] is '" + docName[15].id + "'");
+//        console.log([docName[0].id]);
       });
-
     // Unsubcribe when unmounting
     return () => {
       unsubcribe();
@@ -69,10 +69,18 @@ export default function NotesScreen({ navigation, route }) {
   }
 
   // This deletes an individual note
-  function deleteNote(id) {
-    console.log("Deleting " + id);
-    // To delete that item, we filter out the item we don't want
-    setNotes(notes.filter((item) => item.id !== id));
+  function deleteNote(recID) {
+    console.log("Deleting " + recID + ", docName " + docName[recID].id);
+    // To delete that item from screen, we filter out the item we don't want
+//  setNotes(notes.filter((item) => item.id !== recID));
+    // To delete using unique docName
+    firebase.firestore().collection("todos").doc(docName[recID].id).delete().then(function() {
+      // To delete that item from screen, we filter out the item we don't want
+      setNotes(notes.filter((item) => item.id !== recID));
+      console.log("Document successfully deleted!");
+    }).catch(function(error) {
+      console.error("Error removing document: ", error);
+    });;
   }
 
   // The function to render each row in our FlatList
