@@ -1,4 +1,4 @@
-import firebase from "../database/firebaseDB.js";
+import firebase from "../database/firebaseDB";
 import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
@@ -12,24 +12,22 @@ import { Ionicons } from "@expo/vector-icons";
 export default function NotesScreen({ navigation, route }) {
   const [docName, setDocName] = useState([]);
   const [notes, setNotes] = useState([]);
+  const db = firebase.firestore().collection("todos");
 
   // Load up Firebase on start.
   // The snapshot keeps everything synced -- no need to do it again!
+  // WHen the screen loads, we start monitoring Firebase
   useEffect(() => {
-    const unsubcribe = firebase
-      .firestore()
-      .collection("todos")
-      .onSnapshot((snapshot) => {
-        const updatedNotes = snapshot.docs.map((doc) => doc.data());
+    const unsubcribe = db.onSnapshot((collection) => {
+        // this set up a array that store the unique data
+        const updatedNotes = collection.docs.map((doc) => doc.data());
         setNotes(updatedNotes);
-        // replace id to document name, not sure if this is the one
-        setDocName(snapshot.docs); // this set up a array that store the unique docName
-//        console.log([docName[0].id]);
+        // this set up a array that store the unique docName
+        const updatedDocName = collection.docs.map((doc) => doc.id);
+        setDocName(updatedDocName);
       });
     // Unsubcribe when unmounting
-    return () => {
-      unsubcribe();
-    };
+    return unsubcribe; // return the cleanup function
   }, []);
 
   // This is to set up the top right button
@@ -59,8 +57,8 @@ export default function NotesScreen({ navigation, route }) {
         done: false,
         id: notes.length.toString(),
       };
-      firebase.firestore().collection("todos").add(newNote);
-      setNotes([...notes, newNote]);
+      db.add(newNote);
+//      setNotes([...notes, newNote]); // the listner has this done
     }
   }, [route.params?.text]);
 
@@ -70,11 +68,9 @@ export default function NotesScreen({ navigation, route }) {
 
   // This deletes an individual note
   function deleteNote(recID) {
-    console.log("Deleting " + recID + ", docName " + docName[recID].id);
-    // To delete that item from screen, we filter out the item we don't want
-//  setNotes(notes.filter((item) => item.id !== recID));
-    // To delete using unique docName
-    firebase.firestore().collection("todos").doc(docName[recID].id).delete().then(function() {
+
+    // delete using unique docName
+    db.doc(docName[recID]).delete().then(function() {
       // To delete that item from screen, we filter out the item we don't want
       setNotes(notes.filter((item) => item.id !== recID));
       console.log("Document successfully deleted!");

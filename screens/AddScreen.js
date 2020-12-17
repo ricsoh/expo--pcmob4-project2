@@ -5,7 +5,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   TextInput,
+  LogBox,
 } from "react-native";
+
+//LogBox.ignoreLogs(['Setting a timer']);
 
 export default function AddScreen({ navigation }) {
   const [text, setText] = useState("");
