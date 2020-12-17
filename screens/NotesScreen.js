@@ -25,7 +25,7 @@ export default function NotesScreen({ navigation, route }) {
           ...doc.data(),
           id: doc.id,
         };
-        console.log(noteObject);
+//        console.log(noteObject);
         return noteObject;
       });
       setNotes(updatedNotes);
@@ -79,6 +79,8 @@ export default function NotesScreen({ navigation, route }) {
       };
       db.add(newNote);
 //      setNotes([...notes, newNote]); // the listner has this done
+      // This reset the params so that subsequent similar params can be stored
+      route.params.text = "";
     }
   }, [route.params?.text]);
 
