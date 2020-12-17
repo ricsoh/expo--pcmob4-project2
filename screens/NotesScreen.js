@@ -16,18 +16,36 @@ export default function NotesScreen({ navigation, route }) {
 
   // Load up Firebase on start.
   // The snapshot keeps everything synced -- no need to do it again!
-  // WHen the screen loads, we start monitoring Firebase
+  // When the screen loads, we start monitoring Firebase
+  useEffect(() => {
+//    const unsubscribe = db.onSnapshot((collection) => {
+    const unsubscribe = db.orderBy("created").onSnapshot((collection) => {      
+      const updatedNotes = collection.docs.map((doc) => {
+        const noteObject = {
+          ...doc.data(),
+          id: doc.id,
+        };
+        console.log(noteObject);
+        return noteObject;
+      });
+      setNotes(updatedNotes);
+    });
+
+  {/*
   useEffect(() => {
     const unsubcribe = db.onSnapshot((collection) => {
         // this set up a array that store the unique data
         const updatedNotes = collection.docs.map((doc) => doc.data());
+        // Add docName as id
+
         setNotes(updatedNotes);
         // this set up a array that store the unique docName
         const updatedDocName = collection.docs.map((doc) => doc.id);
         setDocName(updatedDocName);
       });
+*/}
     // Unsubcribe when unmounting
-    return unsubcribe; // return the cleanup function
+    return unsubscribe; // return the cleanup function
   }, []);
 
   // This is to set up the top right button
@@ -55,7 +73,9 @@ export default function NotesScreen({ navigation, route }) {
       const newNote = {
         title: route.params.text,
         done: false,
-        id: notes.length.toString(),
+        // id: notes.length.toString(),
+        created: firebase.firestore.FieldValue.serverTimestamp(),
+        // created: Date.now().toString(), // alternative:
       };
       db.add(newNote);
 //      setNotes([...notes, newNote]); // the listner has this done
@@ -69,14 +89,24 @@ export default function NotesScreen({ navigation, route }) {
   // This deletes an individual note
   function deleteNote(recID) {
 
+    console.log("Deleting " + recID);
+    db.doc(recID).delete();
+{/*
+    // delete using search
+    db.where("id", "==", recID)
+      .get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach((doc) => doc.ref.delete());
+      });
+
     // delete using unique docName
     db.doc(docName[recID]).delete().then(function() {
-      // To delete that item from screen, we filter out the item we don't want
-      setNotes(notes.filter((item) => item.id !== recID));
+      setNotes(notes.filter((item) => item.id !== recID)); // To delete that item from screen, we filter out the item we don't want
       console.log("Document successfully deleted!");
     }).catch(function(error) {
       console.error("Error removing document: ", error);
     });;
+*/}
   }
 
   // The function to render each row in our FlatList
